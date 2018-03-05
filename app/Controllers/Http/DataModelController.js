@@ -2,6 +2,8 @@
 
 const DataModel = use('App/Models/DataModel')
 const DataModelData = use('App/Models/DataModelData')
+const Database = use('Database')
+const Bookshelf = use('bookshelf')
 
 class DataModelController {
 
@@ -34,9 +36,42 @@ class DataModelController {
         dataModel.model_slug = request.input('model_slug');
         dataModel.model_description = request.input('model_description');
         dataModel.fields = request.input('fields');
-        dataModel.relations = request.input('relations');
 
-        let modelData = request.all();
+        Database.connection().knex.schema.createTable('dm_' + dataModel.model_slug, (table) => {
+            table.increments();
+
+            for(let x = 0; x < request.input('fields').length; x++){
+                let field = request.input('fields')[x];
+
+                switch(field.type){
+                    case 'relation_one':
+
+                    break;
+                    case 'relation_many':
+
+                    break;
+                    default:
+                        if(field.required){
+                            if(field.unique){
+                                table[field.type](field.name).notNullable().unique()
+                            }else{
+                                table[field.type](field.name).notNullable()
+                            }
+                        }else{
+                            if(field.unique){
+                                table[field.type](field.name).unique()
+                            }else{
+                                table[field.type](field.name)
+                            }
+                        }
+                    break;
+                }
+            }
+
+            table.timestamps();
+        }).then();
+
+//        let modelData = request.all();
 
         await dataModel.save();
 

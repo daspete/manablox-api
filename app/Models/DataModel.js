@@ -12,8 +12,7 @@ class DataModel extends Model {
         super.boot()
 
         this.addTrait('@provider:Jsonable', [
-            'fields',
-            'relations'
+            'fields'
         ])
     }
 

@@ -40,5 +40,4 @@ Route.group(() => {
 
     Route.resource('models', 'DataModelController').middleware(['auth'])
 
-
 }).prefix('api/v1')
