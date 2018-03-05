@@ -70,6 +70,23 @@ class DataModelController {
         }
     }
 
+    async destroy({ request, response }) {
+        const id = request.params.id
+        const dataModel = await DataModel.find(id);
+        if (dataModel) {
+            try {
+                await dataModel.delete()
+                response.json({ success: true, message: 'DataModel has been deleted' });
+            } catch (e) {
+                response.json({ success: false, message: 'Error, deleting the DataModel', error: e });
+            }
+        } else {
+            response.json({ success: false, message: 'Unable to find DataModel to delete' });
+        }
+
+        response.send(request.params());
+    }
+
 }
 
 module.exports = DataModelController

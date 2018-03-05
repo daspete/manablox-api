@@ -119,7 +119,7 @@ class RoleController {
     }
 
     async destroy({ request, response }) {
-        const id = request.param('id')
+        const id = request.params.id
         const role = await Role.find(id);
         if (role) {
             try {
