@@ -7,136 +7,109 @@ const Validator = use('Validator')
 class PermissionController {
 
     async index({ request, response }){
-        const permissions = await Permission.query()
-        await response.send({
-            permissions: permissions
-        })
+        const permissions = await Permission.all()
+        await response.send({ permissions })
     }
 
     async show({ request, response }) {
-        const id = request.params.id
-        const permission = await Permission.find(id)
+        // get the requested permission id
+        const permission = await Permission.find(request.params.id)
 
-        if (permission) {
-            const permissionRoles = await permission.roles().fetch();
-
-            permission.roles = permissionRoles;
-
-            await response.send(permission);
-        } else {
-            await response.status(404).send({
-                error: {
-                    message: 'Permission not found'
-                }
-            });
+        // send the permission, when we got it, otherwise send an error
+        if(permission){
+            permission.roles = await permission.roles().fetch()
+            await response.send(permission)
+        }else{
+            await response.status(404).send({ error: { message: 'Permission not found' }})
         }
     }
 
     async store({ request, response }){
-        const permission = new Permission;
-        permission.permission_title = request.input("permission_title");
-        permission.permission_slug = request.input("permission_slug");
-        permission.permission_description = request.input("permission_description");
+        // validate the input
+        const validation = await Validator.validate(request.all(), Permission.rules, {
+            'permission_title.unique': 'Permission title already exists',
+            'permission_slug.unique': 'Permission slug already exists'
+        })
 
-        var permissionData = request.all();
-        var messages = {
-            'permission_title.unique': 'Permission already exist',
-            'permission_slug.unique': 'Permission Slug already exist'
+        // if validation fails, give us the errors
+        if(validation.fails()){
+            await response.status(400).send({ error: { message: validation.messages()[0] }})
+            return
         }
-        const validation = await Validator.validate(permissionData, Permission.rules, messages)
-        if (validation.fails()) {
-            response.json({ error: { message: validation.messages()[0] }})
-        } else {
-            await permission.save();
 
-            let permissionRoles = request.input('roles');
+        // create the new permission
+        const permission = new Permission();
+        permission.permission_title = request.input("permission_title")
+        permission.permission_slug = request.input("permission_slug")
+        permission.permission_description = request.input("permission_description")
+        await permission.save();
 
-            for (let x = 0; x < permissionRoles.length; x++) {
-                const permissionRole = new PermissionRole()
-
-                permissionRole.permission_id = permission.id
-                permissionRole.role_id = permissionRoles[x].id
-
-                await permissionRole.save();
-
-            }
-
-            var message = {
-                title: 'Success',
-                text: 'Permission created successfully',
-                type: 'success'
-            }
-            response.json({ success: true, message: message, new_permission: permission })
+        // check if we got some roles for our new permission and if, just save the relations
+        let permissionRoles = request.input('roles')
+        for(let x = 0; x < permissionRoles.length; x++){
+            const permissionRole = new PermissionRole()
+            permissionRole.permission_id = permission.id
+            permissionRole.role_id = permissionRoles[x].id
+            await permissionRole.save()
         }
+
+        await response.status(201).send({ success: true })
     }
 
     async update({ request, response }) {
-        const id = request.params.id
-        const permissionRoles = request.input('roles')
+        // validate the input
+        const validation = await Validator.validate(request.all(), {
+            permission_title: `required|unique:permissions,permission_title,id,${request.params.id}`
+        }, {
+            'permission_title.unique': 'Permission title already exists',
+            'permission_title.required': 'Permission title is required'
+        })
 
-        const permission = await Permission.find(id)
+        // if validation fails, give us the errors
+        if(validation.fails()){
+            await response.status(400).send({ error: { message: validation.messages()[0] }})
+            return
+        }
 
-        if (permission) {
-            permission.permission_title = request.input('permission_title');
+        // get the permission to edit, if we haven't got it, return an error
+        const permission = await Permission.find(request.params.id)
+        if(permission){
+            permission.permission_title = request.input('permission_title')
+            await permission.save()
 
-            var rules = {
-                permission_title: `required|unique:permissions,permission_title,id,${permission.id}`
+            // delete all permission roles before inserting the updated ones
+            await PermissionRole
+                .query()
+                .where('permission_id', permission.id)
+                .delete()
+
+            let permissionRoles = request.input('roles');
+            for (let x = 0; x < permissionRoles.length; x++) {
+                const permissionRole = new PermissionRole()
+                permissionRole.permission_id = permission.id
+                permissionRole.role_id = permissionRoles[x].id
+                await permissionRole.save()
             }
 
-            const validation = await Validator.validate(request.all(), rules);
-
-            if (validation.fails()) {
-                await response.status(500).send({
-                    error: {
-                        message: validation.messages()[0]
-                    }
-                })
-            } else {
-                permission.save();
-
-                await PermissionRole
-                    .query()
-                    .where('permission_id', permission.id)
-                    .delete()
-
-                let permissionRoles = request.input('roles');
-
-                for (let x = 0; x < permissionRoles.length; x++) {
-                    const permissionRole = new PermissionRole()
-
-                    permissionRole.permission_id = permission.id
-                    permissionRole.role_id = permissionRoles[x].id
-
-                    await permissionRole.save();
-
-                }
-            }
-
-
-
-
-        } else {
-            await response.status(404).send({
-                message: 'Role not found'
-            })
+            await response.status(200).send({ success: true })
+        }else{
+            await response.status(404).send({ error: { message: 'Permission not found' }});
         }
     }
 
     async destroy({ request, response }){
-        const id = request.params.id
-        const permission = await Permission.find(id)
-        if (permission) {
-            try {
+        const permission = await Permission.find(request.params.id)
+        if(permission){
+            try{
                 await permission.delete()
-                response.json({ success: true, message: 'Permission has been deleted' });
-            } catch (e) {
-                response.json({ success: false, message: 'Error, deleting the permission', error: e });
+
+                await response.status(200).send({ success: true })
+            }catch(e){
+                await response.status(500).send({ error: { message: 'Error while deleting the permission' }})
             }
         } else {
-            response.json({ success: false, message: 'Unable to find permission to delete' });
+            await response.status(404).send({ error: { message: 'Permission not found' }})
         }
-
-        response.send(request.params);
     }
 
 }

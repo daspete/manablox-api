@@ -18,6 +18,7 @@ const providers = [
   '@adonisjs/lucid/providers/LucidProvider',
   '@adonisjs/validator/providers/ValidatorProvider',
   'adonis-jsonable/providers/JsonableProvider',
+  '@adonisjs/drive/providers/DriveProvider',
 ]
 
 /*

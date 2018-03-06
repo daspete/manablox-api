@@ -40,4 +40,11 @@ Route.group(() => {
 
     Route.resource('models', 'DataModelController').middleware(['auth'])
 
+    Route.get('data/:slug', 'DataModelDataController.index')
+    Route.post('data/:slug', 'DataModelDataController.store')
+    Route.put('data/:slug/:id', 'DataModelDataController.update')
+    Route.delete('data/:slug/:id', 'DataModelDataController.destroy')
+
+
+
 }).prefix('api/v1')

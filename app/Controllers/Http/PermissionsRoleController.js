@@ -8,35 +8,26 @@ const Validator = use('Validator')
 class PermissionsRoleController {
 
     async index({ request, response }){
+        const roles = await Role.all()
+        const permissions = await Permission.all()
 
-        const roles = await Role.query()
-        const permissions = await Permission.query()
-        await response.send({
-            roles: roles,
-            permissions: permissions,
-            totalPermissions: permissions.length
-        })
+        await response.status(200).send({ roles, permissions })
     }
 
     async update({ request, response }){
-        const role_id = request.param('id');
-        const new_permissions = request.input('new_permissions');
+        const permission_role = await PermissionRole.findBy('role_id', request.params.id);
 
-        const permission_role = await PermissionRole.findBy('role_id', role_id);
-        if (permission_role) {
+        if(permission_role){
             await permission_role.delete()
         }
 
+        const new_permissions = request.input('new_permissions');
         const new_permission_roles = await PermissionRole.createMany(new_permissions)
+
         if (new_permission_roles) {
-            var message = {
-                title: 'Success',
-                text: 'The permissions for this role has been updated successfully',
-                type: 'success'
-            }
-            response.json({ success: true, message: message })
+            await response.status(200).send({ success: true })
         } else {
-            response.json({ success: false, error_message: "Unable to update permissions" })
+            await response.status(400).send({ error: { message: 'Error while updating permission role' }})
         }
     }
 

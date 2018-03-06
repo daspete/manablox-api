@@ -13,9 +13,8 @@ class AuthController {
             }else{
                 await response.status(401).send('Unauthorized');
             }
-
         }catch(e){
-            await response.status(401).send({ error: e.message })
+            await response.status(401).send({ error: { message: e.message }})
         }
     }
 
@@ -29,7 +28,7 @@ class AuthController {
         try {
             await response.status(200).send({ user: await auth.getUser() });
         }catch(e){
-            await response.status(401).send({ error: e.message })
+            await response.status(401).send({ error: { message: e.message }})
         }
     }
 
