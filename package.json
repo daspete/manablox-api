@@ -1,6 +1,6 @@
 {
   "name": "manablox-api",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "api for manablox built on adonisjs and bookshelf",
   "main": "server.js",
   "repository": "git@github.com:daspete/manablox-api.git",
