@@ -30,6 +30,14 @@ class UsersController {
         user.password = request.input('password')
         await user.save()
 
+        const userRoles = request.input('roles');
+        for (let x = 0; x < userRoles.length; x++) {
+            const role_user = new RoleUser()
+            role_user.role_id = userRoles[x].id
+            role_user.user_id = user.id
+            await role_user.save()
+        }
+
         await response.status(201).send({ success: true })
     }
 

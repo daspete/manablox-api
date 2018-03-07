@@ -15,12 +15,12 @@ class RoleController {
         const role = await Role.find(request.params.id)
 
         if(role){
-            const rolePermissions = await role.permissions().fetch();
-            role.permissions = rolePermissions;
+            const rolePermissions = await role.permissions().fetch()
+            role.permissions = rolePermissions
 
-            await response.status(200).send(role);
+            await response.status(200).send(role)
         }else{
-            await response.status(404).send({ error: { message: 'Role not found' }});
+            await response.status(404).send({ error: { message: 'Role not found' }})
         }
     }
 
@@ -33,15 +33,15 @@ class RoleController {
         // if validation fails, give us the errors
         if(validation.fails()){
             await response.status(400).send({ error: { message: validation.messages()[0] }})
-            return;
+            return
         }
 
-        const role = new Role;
-        role.role_title = request.input('role_title');
-        role.role_slug = request.input('role_slug');
-        await role.save();
+        const role = new Role()
+        role.role_title = request.input('role_title')
+        role.role_slug = request.input('role_slug')
+        await role.save()
 
-        let rolePermissions = request.input('permissions');
+        let rolePermissions = request.input('permissions')
         for(let x = 0; x < rolePermissions.length; x++){
             const permissionRole = new PermissionRole()
             permissionRole.permission_id = rolePermissions[x].id
@@ -60,39 +60,40 @@ class RoleController {
         }, {
             'role_title.unique': 'Role title already exists',
             'role_title.required': 'Role title is required'
-        });
+        })
 
         if(validation.fails()){
             await response.status(400).send({ error: { message: validation.messages()[0] }})
-            return;
+            return
         }
 
         const role = await Role.find(id)
 
         if(role){
-            role.role_title = request.input('role_title');
-            await role.save();
+            role.role_title = request.input('role_title')
+            await role.save()
 
             await PermissionRole
                 .query()
                 .where('role_id', role.id)
                 .delete()
 
+            let rolePermissions = request.input('permissions')
             for(let x = 0; x < rolePermissions.length; x++){
                 const permissionRole = new PermissionRole()
                 permissionRole.permission_id = rolePermissions[x].id
                 permissionRole.role_id = role.id
-                await permissionRole.save();
+                await permissionRole.save()
             }
 
             await response.status(200).send({ success: true })
         }else{
-            await response.status(404).send({ error: { message: 'Role not found' }});
+            await response.status(404).send({ error: { message: 'Role not found' }})
         }
     }
 
-    async destroy({ request, response }) {
-        const role = await Role.find(request.params.id);
+    async destroy({ request, response }){
+        const role = await Role.find(request.params.id)
         if(role){
             try{
                 await role.delete()
@@ -101,7 +102,7 @@ class RoleController {
                 await response.status(500).send({ error: { message: 'Error while deleting the role' }})
             }
         }else{
-            await response.status(404).send({ error: { message: 'Role not found' }});
+            await response.status(404).send({ error: { message: 'Role not found' }})
         }
     }
 
