@@ -46,6 +46,14 @@ class DataModelController {
             dataModel.model_name = request.input('model_name')
             dataModel.model_slug = request.input('model_slug')
             dataModel.model_description = request.input('model_description')
+
+            const data = new Data()
+            await data.updateTable(dataModel, {
+                orig: JSON.parse(JSON.stringify(dataModel.fields)),
+                update: request.input('fields')
+            })
+
+            dataModel.fields = request.input('fields')
             await dataModel.save()
 
             await response.status(200).send({ success: true })

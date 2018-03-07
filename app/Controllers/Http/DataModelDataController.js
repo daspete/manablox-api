@@ -29,7 +29,7 @@ class DataModelDataController {
                 switch(dataModel.fields[x].type){
                     case 'relation_one':
                         foreignData = new Data()
-                        foreignModel = await foreignData.LoadModel(dataModel.fields[x].relation_one.model_slug)
+                        foreignModel = await foreignData.LoadModelById(dataModel.fields[x].relation_one)
                         foreignModelData = await foreignModel.find(modelData[i][dataModel.fields[x].name])
 
                         modelData[i][dataModel.fields[x].name] = foreignModelData
@@ -38,7 +38,7 @@ class DataModelDataController {
                         if(!modelData[i][dataModel.fields[x].name]) continue
 
                         foreignData = new Data()
-                        foreignModel = await foreignData.LoadModel(dataModel.fields[x].relation_many.model_slug)
+                        foreignModel = await foreignData.LoadModelById(dataModel.fields[x].relation_many)
                         foreignModelIDs = JSON.parse(modelData[i][dataModel.fields[x].name]);
                         foreignModelData = await foreignModel
                             .query()
@@ -79,7 +79,7 @@ class DataModelDataController {
             switch(dataModel.fields[x].type){
                 case 'relation_one':
                     foreignData = new Data()
-                    foreignModel = await foreignData.LoadModel(dataModel.fields[x].relation_one.model_slug)
+                    foreignModel = await foreignData.LoadModelById(dataModel.fields[x].relation_one)
                     foreignStoreData = request.input(fieldName)
                     foreignModelData = await foreignModel.find(foreignStoreData)
 
@@ -91,7 +91,7 @@ class DataModelDataController {
                 break;
                 case 'relation_many':
                     foreignData = new Data()
-                    foreignModel = await foreignData.LoadModel(dataModel.fields[x].relation_many.model_slug)
+                    foreignModel = await foreignData.LoadModelById(dataModel.fields[x].relation_many)
                     foreignStoreData = request.input(fieldName)
                     foreignModelData = await foreignModel
                         .query()

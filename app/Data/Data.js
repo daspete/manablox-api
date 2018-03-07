@@ -3,6 +3,7 @@
 const Database = use('Database')
 const Drive = use('Drive')
 const Helpers = use('Helpers')
+const DataModel = use('App/Models/DataModel')
 
 class Data {
 
@@ -59,6 +60,135 @@ class Data {
         }).then();
     }
 
+    async updateTable(model, fields){
+        let origFields = [];
+        let newFields = [];
+
+        let deletes = [];
+        let updates = [];
+        let inserts = [];
+
+        let x = null;
+
+        for(x = 0; x < fields.orig.length; x++){
+            let newField = fields.update.find((el) => { return el.name == fields.orig[x].name });
+
+            if(typeof newField === 'undefined'){
+                deletes.push(fields.orig[x])
+            }else{
+                let o = JSON.stringify(fields.orig[x])
+                let u = JSON.stringify(newField)
+
+                if(o != u){
+                    updates.push(newField);
+                }
+            }
+        }
+
+        for(x = 0; x < fields.update.length; x++){
+            let oldField = fields.orig.find((el) => { return el.name == fields.update[x].name });
+
+            if(typeof oldField === 'undefined'){
+                inserts.push(fields.update[x])
+            }
+        }
+
+        for(x = 0; x < deletes.length; x++){
+            let field = deletes[x];
+
+            Database.connection().knex.schema.table(this.prefix + model.model_slug, (table) => {
+                table.dropColumn(field.name)
+            }).then()
+        }
+
+        for(x = 0; x < updates.length; x++){
+            let field = updates[x];
+
+            Database.connection().knex.schema.table(this.prefix + model.model_slug, (table) => {
+                table.dropColumn(field.name)
+            }).then()
+
+            Database.connection().knex.schema.table(this.prefix + model.model_slug, (table) => {
+
+                switch(field.type){
+                    case 'relation_one':
+                        if(field.required){
+                            table.integer(field.name).notNullable()
+                        }else{
+                            table.integer(field.name)
+                        }
+                    break;
+                    case 'relation_many':
+                        if(field.required){
+                            table.specificType(field.name, 'json').notNullable()
+                        }else{
+                            table.specificType(field.name, 'json')
+                        }
+                    break;
+                    default:
+                        if(field.required){
+                            if(field.unique){
+                                table[field.type](field.name).notNullable().unique()
+                            }else{
+                                table[field.type](field.name).notNullable()
+                            }
+                        }else{
+                            if(field.unique){
+                                table[field.type](field.name).unique()
+                            }else{
+                                table[field.type](field.name)
+                            }
+                        }
+                    break;
+                }
+            }).then()
+        }
+
+        for(x = 0; x < inserts.length; x++){
+            let field = inserts[x];
+
+            Database.connection().knex.schema.table(this.prefix + model.model_slug, (table) => {
+
+                switch(field.type){
+                    case 'relation_one':
+                        if(field.required){
+                            table.integer(field.name).notNullable()
+                        }else{
+                            table.integer(field.name)
+                        }
+                    break;
+                    case 'relation_many':
+                        if(field.required){
+                            table.specificType(field.name, 'json').notNullable()
+                        }else{
+                            table.specificType(field.name, 'json')
+                        }
+                    break;
+                    default:
+                        if(field.required){
+                            if(field.unique){
+                                table[field.type](field.name).notNullable().unique()
+                            }else{
+                                table[field.type](field.name).notNullable()
+                            }
+                        }else{
+                            if(field.unique){
+                                table[field.type](field.name).unique()
+                            }else{
+                                table[field.type](field.name)
+                            }
+                        }
+                    break;
+                }
+            }).then()
+        }
+
+        // console.log('updates', updates);
+        // console.log('deletes', deletes);
+        // console.log('inserts', inserts);
+
+    }
+
     async removeTable(model){
         await Database.connection().knex.schema.dropTableIfExists(this.prefix + model.model_slug).then()
     }
@@ -96,6 +226,15 @@ class Data {
 
     async LoadModel(name){
         let _model = require(Helpers.resourcesPath() + '/data/models/' + name + this.modelExtension)
+        _model.boot();
+
+        return _model;
+    }
+
+    async LoadModelById(id){
+        let dataModel = await DataModel.find(id)
+
+        let _model = require(Helpers.resourcesPath() + '/data/models/' + dataModel.model_slug + this.modelExtension)
         _model.boot();
 
         return _model;
