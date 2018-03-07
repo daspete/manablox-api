@@ -15,13 +15,13 @@ class PermissionsRoleController {
     }
 
     async update({ request, response }){
-        const permission_role = await PermissionRole.findBy('role_id', request.params.id);
+        const permission_role = await PermissionRole.findBy('role_id', request.params.id)
 
         if(permission_role){
             await permission_role.delete()
         }
 
-        const new_permissions = request.input('new_permissions');
+        const new_permissions = request.input('new_permissions')
         const new_permission_roles = await PermissionRole.createMany(new_permissions)
 
         if (new_permission_roles) {

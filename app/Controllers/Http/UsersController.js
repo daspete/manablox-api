@@ -7,9 +7,8 @@ const Validator = use('Validator')
 
 class UsersController {
     async index({ request, response }){
-        const users = await User.all();
-
-        await response.send(users);
+        const users = await User.all()
+        await response.send(users)
     }
 
     async create({ request, response }){
@@ -21,16 +20,16 @@ class UsersController {
 
         if(validation.fails()){
             await response.status(400).send({ error: { message: validation.messages()[0] }})
-            return;
+            return
         }
 
-        const user = new User;
+        const user = new User()
         user.username = request.input("username")
         user.email = request.input("email")
         user.password = request.input('password')
         await user.save()
 
-        const userRoles = request.input('roles');
+        const userRoles = request.input('roles')
         for (let x = 0; x < userRoles.length; x++) {
             const role_user = new RoleUser()
             role_user.role_id = userRoles[x].id
@@ -49,32 +48,12 @@ class UsersController {
 
             await response.status(200).send(user)
         } else {
-            await response.status(404).send({ error: { message: 'User not found' }});
+            await response.status(404).send({ error: { message: 'User not found' }})
         }
     }
 
-    // async edit({ request, response }){
-    //     const id = request.params.id
-    //     const user = await User.find(id)
-
-    //     if(user){
-    //         await response.send({
-    //             user: user,
-    //         })
-    //     }else{
-    //         var message = {
-    //             title: 'Atention!',
-    //             text: 'Unable to find user to edit',
-    //             type: 'warning'
-    //         }
-    //         //await request.with({ message: message }).flash()
-    //         await response.status(201).send({ message });
-    //         //response.redirect('/users')
-    //     }
-    // }
-
     async update({ request, response }){
-        let id = request.params.id;
+        let id = request.params.id
 
         const validation = await Validator.validate(request.all(), {
             username: `required|unique:users,username,id,${id}`,
@@ -83,22 +62,22 @@ class UsersController {
 
         if(validation.fails()){
             await response.status(400).send({ error: { message: validation.messages()[0] }})
-            return;
+            return
         }
 
         const user = await User.find(id)
 
         if(user){
-            user.username = request.input("username");
-            user.email = request.input('email');
-            user.gender = request.input('gender');
-            user.first_name = request.input('first_name');
-            user.last_name = request.input('last_name');
+            user.username = request.input("username")
+            user.email = request.input('email')
+            user.gender = request.input('gender')
+            user.first_name = request.input('first_name')
+            user.last_name = request.input('last_name')
             if(request.input('password'))
                 user.password = await Hash.make(request.input('password'))
-            await user.save();
+            await user.save()
 
-            const userRoles = request.input('roles');
+            const userRoles = request.input('roles')
 
             await RoleUser
                 .query()

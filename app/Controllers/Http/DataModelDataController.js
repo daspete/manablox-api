@@ -17,9 +17,9 @@ class DataModelDataController {
     }
 
     async store({ request, response }){
-        const modelName = request.params.slug;
+        const modelName = request.params.slug
 
-        let data = new Data();
+        let data = new Data()
         let dModel = await data.LoadModel(modelName)
 
         const dataModel = await DataModel.findBy('model_slug', modelName)
@@ -31,7 +31,7 @@ class DataModelDataController {
             }
         }
 
-        await dModel.save();
+        await dModel.save()
     }
 
     async update({ request, response }){

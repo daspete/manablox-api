@@ -38,11 +38,11 @@ class PermissionController {
         }
 
         // create the new permission
-        const permission = new Permission();
+        const permission = new Permission()
         permission.permission_title = request.input("permission_title")
         permission.permission_slug = request.input("permission_slug")
         permission.permission_description = request.input("permission_description")
-        await permission.save();
+        await permission.save()
 
         // check if we got some roles for our new permission and if, just save the relations
         let permissionRoles = request.input('roles')
@@ -83,7 +83,7 @@ class PermissionController {
                 .where('permission_id', permission.id)
                 .delete()
 
-            let permissionRoles = request.input('roles');
+            let permissionRoles = request.input('roles')
             for (let x = 0; x < permissionRoles.length; x++) {
                 const permissionRole = new PermissionRole()
                 permissionRole.permission_id = permission.id
@@ -93,7 +93,7 @@ class PermissionController {
 
             await response.status(200).send({ success: true })
         }else{
-            await response.status(404).send({ error: { message: 'Permission not found' }});
+            await response.status(404).send({ error: { message: 'Permission not found' }})
         }
     }
 

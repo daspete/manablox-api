@@ -27,7 +27,7 @@ class RolesUserController {
 
         if(validation.fails()){
             await response.status(400).send({ error: { message: validation.messages()[0] }})
-            return;
+            return
         }
 
         const role_user = await RoleUser.query()
@@ -35,7 +35,7 @@ class RolesUserController {
             .where('role_id', '=', request.input('role_id'))
 
         if(role_user.getCount() == 0){
-            const role_user = new RoleUser;
+            const role_user = new RoleUser()
             role_user.user_id = request.input('user_id')
             role_user.role_id = request.input('role_id')
             await response.status(201).send({ success: true })
@@ -45,7 +45,7 @@ class RolesUserController {
     }
 
     async destroy({ request, response }){
-        const user_role = await RoleUser.find(request.params.id);
+        const user_role = await RoleUser.find(request.params.id)
 
         if(user_role){
             try{
@@ -56,7 +56,7 @@ class RolesUserController {
                 await response.status(500).send({ error: { message: 'Error while deleting the user role' }})
             }
         } else {
-            await response.status(404).send({ error: { message: 'User role not found' }});
+            await response.status(404).send({ error: { message: 'User role not found' }})
         }
     }
 
