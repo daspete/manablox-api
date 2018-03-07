@@ -32,9 +32,7 @@ class DataModelController {
 
         const data = new Data()
         await data.createTable(dataModel, request.input('fields'))
-        await data.createModel({
-            model_name: dataModel.model_slug
-        })
+        await data.createModel(dataModel, request.input('fields'))
 
         await dataModel.save()
 
@@ -60,6 +58,9 @@ class DataModelController {
         const dataModel = await DataModel.find(request.params.id)
         if(dataModel){
             try{
+                const data = new Data()
+                await data.removeTable(dataModel)
+                await data.removeModel(dataModel)
                 await dataModel.delete()
 
                 await response.status(200).send({ success: true })

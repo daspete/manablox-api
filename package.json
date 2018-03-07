@@ -30,6 +30,7 @@
   },
   "devDependencies": {},
   "autoload": {
-    "App": "./app"
+    "App": "./app",
+    "DataModels": "./resources/data/models"
   }
 }
