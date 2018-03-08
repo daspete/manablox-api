@@ -23,4 +23,4 @@ This is a nodejs API built on adonisjs for a headless-cms system
 
 ## Going further
 
-we have a web app for using and building your api, you'll find it here: [https://github.com/daspete/manablox-api-builder](https://github.com/daspete/manablox-api-builder)
+we have a web app for using and building your api, have a look at [manablox-api-builder](https://github.com/daspete/manablox-api-builder)
