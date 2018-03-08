@@ -35,6 +35,8 @@ class DataModelController {
         dataModel.model_name = request.input('model_name')
         dataModel.model_slug = request.input('model_slug')
         dataModel.model_description = request.input('model_description')
+        dataModel.fields_for_select = request.input('fields_for_select')
+        dataModel.fields_in_lists = request.input('fields_in_lists')
         dataModel.fields = request.input('fields')
 
         const data = new Data()
@@ -53,6 +55,8 @@ class DataModelController {
             dataModel.model_name = request.input('model_name')
             dataModel.model_slug = request.input('model_slug')
             dataModel.model_description = request.input('model_description')
+            dataModel.fields_for_select = request.input('fields_for_select')
+            dataModel.fields_in_lists = request.input('fields_in_lists')
 
             const data = new Data()
             await data.updateTable(dataModel, {

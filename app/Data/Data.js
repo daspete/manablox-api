@@ -23,7 +23,13 @@ class Data {
             for(let x = 0; x < fields.length; x++){
                 let field = fields[x];
 
-                switch(field.type){
+                let fieldType = field.type;
+
+                if(typeof field.nativeType !== 'undefined'){
+                    fieldType = field.nativeType;
+                }
+
+                switch(fieldType){
                     case 'relation_one':
                         if(field.required){
                             table.integer(field.name).notNullable()
@@ -41,15 +47,15 @@ class Data {
                     default:
                         if(field.required){
                             if(field.unique){
-                                table[field.type](field.name).notNullable().unique()
+                                table[fieldType](field.name).notNullable().unique()
                             }else{
-                                table[field.type](field.name).notNullable()
+                                table[fieldType](field.name).notNullable()
                             }
                         }else{
                             if(field.unique){
-                                table[field.type](field.name).unique()
+                                table[fieldType](field.name).unique()
                             }else{
-                                table[field.type](field.name)
+                                table[fieldType](field.name)
                             }
                         }
                     break;
@@ -109,8 +115,13 @@ class Data {
             }).then()
 
             Database.connection().knex.schema.table(this.prefix + model.model_slug, (table) => {
+                let fieldType = field.type;
 
-                switch(field.type){
+                if(typeof field.nativeType !== 'undefined'){
+                    fieldType = field.nativeType;
+                }
+
+                switch(fieldType){
                     case 'relation_one':
                         if(field.required){
                             table.integer(field.name).notNullable()
@@ -128,15 +139,15 @@ class Data {
                     default:
                         if(field.required){
                             if(field.unique){
-                                table[field.type](field.name).notNullable().unique()
+                                table[fieldType](field.name).notNullable().unique()
                             }else{
-                                table[field.type](field.name).notNullable()
+                                table[fieldType](field.name).notNullable()
                             }
                         }else{
                             if(field.unique){
-                                table[field.type](field.name).unique()
+                                table[fieldType](field.name).unique()
                             }else{
-                                table[field.type](field.name)
+                                table[fieldType](field.name)
                             }
                         }
                     break;
@@ -148,8 +159,13 @@ class Data {
             let field = inserts[x];
 
             Database.connection().knex.schema.table(this.prefix + model.model_slug, (table) => {
+                let fieldType = field.type;
 
-                switch(field.type){
+                if(typeof field.nativeType !== 'undefined'){
+                    fieldType = field.nativeType;
+                }
+
+                switch(fieldType){
                     case 'relation_one':
                         if(field.required){
                             table.integer(field.name).notNullable()
@@ -167,15 +183,15 @@ class Data {
                     default:
                         if(field.required){
                             if(field.unique){
-                                table[field.type](field.name).notNullable().unique()
+                                table[fieldType](field.name).notNullable().unique()
                             }else{
-                                table[field.type](field.name).notNullable()
+                                table[fieldType](field.name).notNullable()
                             }
                         }else{
                             if(field.unique){
-                                table[field.type](field.name).unique()
+                                table[fieldType](field.name).unique()
                             }else{
-                                table[field.type](field.name)
+                                table[fieldType](field.name)
                             }
                         }
                     break;
