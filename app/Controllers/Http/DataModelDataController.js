@@ -56,7 +56,14 @@ class DataModelDataController {
     }
 
     async show({ request, response }){
+        const modelName = request.params.slug
 
+        let data = new Data()
+        let model = await data.LoadModel(modelName)
+
+        let dModel = await model.find(request.params.id);
+
+        await response.status(200).send({ data: dModel });
     }
 
     async store({ request, response }){
@@ -118,11 +125,78 @@ class DataModelDataController {
     }
 
     async update({ request, response }){
+        const modelName = request.params.slug
+        const dataModel = await DataModel.findBy('model_slug', modelName)
 
+        let relationOneFields = [];
+        let relationManyFields = [];
+        let x = null;
+
+        for(x = 0; x < dataModel.fields.length; x++){
+            if(dataModel.fields[x].type == 'relation_one'){
+                relationOneFields.push(dataModel.fields[x].name);
+            }
+            if(dataModel.fields[x].type == 'relation_many'){
+                relationManyFields.push(dataModel.fields[x].name);
+            }
+        }
+
+        let data = new Data()
+        let model = await data.LoadModel(modelName)
+
+        let dModel = await model.find(request.params.id);
+
+        let excludes = ['id', 'updated_at', 'created_at'];
+
+        let values = request.except(excludes);
+        let keys = Object.keys(values);
+
+        for(x = 0; x < keys.length; x++){
+            if(relationOneFields.indexOf(keys[x]) !== -1){
+                if(typeof values[keys[x]] !== 'undefined' && values[keys[x]] != null && typeof values[keys[x]].id !== 'undefined'){
+                    dModel[keys[x]] = values[keys[x]].id;
+                }else{
+                    dModel[keys[x]] = values[keys[x]];
+                }
+
+            }else if(relationManyFields.indexOf(keys[x]) !== -1){
+                if(typeof values[keys[x]] !== 'undefined' && typeof values[keys[x]].length !== 'undefined' && typeof values[keys[x]][0] !== 'undefined' && typeof values[keys[x]][0].id !== 'undefined'){
+                    let vals = [];
+
+                    for(let i = 0; i < values[keys[x]].length; i++){
+                        vals.push(values[keys[x]][i].id);
+                    }
+
+                    dModel[keys[x]] = JSON.stringify(vals);
+                }else{
+                    dModel[keys[x]] = JSON.stringify(values[keys[x]]);
+                }
+            }else{
+                dModel[keys[x]] = values[keys[x]];
+            }
+
+        }
+
+        await dModel.save();
     }
 
     async destroy({ request, response }){
+        const modelName = request.params.slug
 
+        let data = new Data()
+        let model = await data.LoadModel(modelName)
+
+        let dModel = await model.find(request.params.id);
+        if(dModel){
+            try{
+                await dModel.delete()
+                await response.status(200).send({ success: true })
+            }catch(e){
+                await response.status(500).send({ error: { message: 'Error while deleting the object' }})
+            }
+        }else{
+            await response.status(404).send({ error: { message: 'Object not found' }})
+        }
     }
 
 }

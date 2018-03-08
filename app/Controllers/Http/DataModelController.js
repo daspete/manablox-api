@@ -14,7 +14,14 @@ class DataModelController {
     }
 
     async show({ request, response }){
-        const datamodel = await DataModel.find(request.params.id)
+        let query = request.get();
+        let datamodel = null;
+
+        if(query.by){
+            datamodel = await DataModel.findBy(query.by, request.params.id)
+        }else{
+            datamodel = await DataModel.find(request.params.id)
+        }
 
         if(datamodel){
             await response.status(200).send(datamodel)

@@ -42,6 +42,7 @@ Route.group(() => {
 
     Route.get('data/:slug', 'DataModelDataController.index')
     Route.post('data/:slug', 'DataModelDataController.store')
+    Route.get('data/:slug/:id', 'DataModelDataController.show')
     Route.put('data/:slug/:id', 'DataModelDataController.update')
     Route.delete('data/:slug/:id', 'DataModelDataController.destroy')
 
