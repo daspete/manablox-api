@@ -4,6 +4,7 @@ const Database = use('Database')
 const Drive = use('Drive')
 const Helpers = use('Helpers')
 const DataModel = use('App/Models/DataModel')
+const Config = use('Config')
 
 class Data {
 
@@ -12,6 +13,21 @@ class Data {
         this.modelPath = 'data/models/';
         this.modelExtension = '.js';
         this.modelTemplatePath = 'data/templates/model.db';
+    }
+
+    getFieldType(fieldType){
+        let returnValue = fieldType;
+
+        let fieldTypes = Config.get('datamodel.fieldTypes')
+        let _fieldType = fieldTypes.find((item) => { return item.type == fieldType })
+
+        if(_fieldType && typeof _fieldType.nativeType !== 'undefined'){
+            returnValue = _fieldType.nativeType
+        }else{
+            returnValue = fieldType
+        }
+
+        return returnValue
     }
 
     async createTable(model, fields){
@@ -23,11 +39,7 @@ class Data {
             for(let x = 0; x < fields.length; x++){
                 let field = fields[x];
 
-                let fieldType = field.type;
-
-                if(typeof field.nativeType !== 'undefined'){
-                    fieldType = field.nativeType;
-                }
+                let fieldType = this.getFieldType(field.type)
 
                 switch(fieldType){
                     case 'relation_one':
@@ -115,11 +127,7 @@ class Data {
             }).then()
 
             Database.connection().knex.schema.table(this.prefix + model.model_slug, (table) => {
-                let fieldType = field.type;
-
-                if(typeof field.nativeType !== 'undefined'){
-                    fieldType = field.nativeType;
-                }
+                let fieldType = this.getFieldType(field.type)
 
                 switch(fieldType){
                     case 'relation_one':
@@ -159,11 +167,7 @@ class Data {
             let field = inserts[x];
 
             Database.connection().knex.schema.table(this.prefix + model.model_slug, (table) => {
-                let fieldType = field.type;
-
-                if(typeof field.nativeType !== 'undefined'){
-                    fieldType = field.nativeType;
-                }
+                let fieldType = this.getFieldType(field.type)
 
                 switch(fieldType){
                     case 'relation_one':
